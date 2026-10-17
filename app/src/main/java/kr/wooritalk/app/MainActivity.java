@@ -36,7 +36,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpsURLConnection;
+import javax.net.ssl.HttpsURLConnection;
 import java.net.URL;
 
 public class MainActivity extends Activity {
