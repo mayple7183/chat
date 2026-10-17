@@ -178,10 +178,15 @@ public class MainActivity extends Activity {
         try{
             FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task->{
                 if(task.isSuccessful()&&task.getResult()!=null&&!task.getResult().isEmpty()){
-                    WooriApp.prefs(this).edit().putString("fcm_token",task.getResult()).apply();dispatchFcmReady();
+                    WooriApp.prefs(this).edit().putString("fcm_token",task.getResult()).putString("fcm_error","").apply();
+                    dispatchFcmReady();
+                }else{
+                    String msg = task.getException()==null ? "FCM token empty" : task.getException().toString();
+                    WooriApp.prefs(this).edit().putString("fcm_error",msg).apply();
+                    dispatchFcmReady();
                 }
             });
-        }catch(Exception ignored){}
+        }catch(Exception e){WooriApp.prefs(this).edit().putString("fcm_error",e.toString()).apply();dispatchFcmReady();}
     }
 
     private void dispatchFcmReady(){
@@ -195,6 +200,7 @@ public class MainActivity extends Activity {
 
     public class NativeBridge {
         @JavascriptInterface public String getFcmToken(){return WooriApp.prefs(MainActivity.this).getString("fcm_token","");}
+        @JavascriptInterface public String getFcmError(){return WooriApp.prefs(MainActivity.this).getString("fcm_error","");}
         @JavascriptInterface public boolean isNotificationsEnabled(){return WooriApp.prefs(MainActivity.this).getBoolean("notifications_enabled",false);}
         @JavascriptInterface public void enableNotifications(){
             WooriApp.prefs(MainActivity.this).edit().putBoolean("notifications_enabled",true).apply();
@@ -202,6 +208,6 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public void disableNotifications(){WooriApp.prefs(MainActivity.this).edit().putBoolean("notifications_enabled",false).apply();}
         @JavascriptInterface public void showLocalNotification(String title,String body){if(!isNotificationsEnabled())return;runOnUiThread(()->NotificationHelper.show(MainActivity.this,title,body,"/"));}
-        @JavascriptInterface public String getAppVersion(){return "1.8.1";}
+        @JavascriptInterface public String getAppVersion(){return "1.8.2";}
     }
 }
